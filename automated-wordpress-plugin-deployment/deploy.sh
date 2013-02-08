@@ -58,7 +58,7 @@ echo -n "Pushing new Git tag..."
 echo "Done."
 
 echo -n "Creating local copy of SVN repo..."
-svn checkout --quiet $SVNURL $SVNPATH
+svn checkout --quiet $SVNURL/trunk $SVNPATH/trunk
 echo "Done."
 
 echo -n "Exporting the HEAD of master from Git to the trunk of SVN..."
@@ -71,21 +71,26 @@ git log --pretty=oneline --abbrev-commit > /tmp/wppdcommitmsg.tmp
 echo "Done."
 
 echo -n "Preparing assets-wp-repo..."
-mkdir $SVNPATH/assets/ > /dev/null 2>&1 # Create assets directory if it doesn't exists
-mv $SVNPATH/trunk/assets-wp-repo/* $SVNPATH/assets/ # Move new assets
-cd $SVNPATH/assets/ # Switch to assets directory
-svn stat | grep "^?\|^M" > /dev/null 2>&1 # Check if new or updated assets exists
-if [ $? -eq 0 ]
+if [ -d $SVNPATH/trunk/assets-wp-repo ]
 	then
-		svn stat | grep "^?" | awk '{print $2}' | xargs svn add --quiet # Add new assets
-		echo -e "\nCommitting new assets..."
-		#svn commit --quiet --username=$SVNUSER -m "Updated assets"
-		echo "Committing new assets...Done."
-		echo "Preparing assets-wp-repo...Done."
+		svn checkout --quiet $SVNURL/assets $SVNPATH/assets > /dev/null 2>&1
+		mkdir $SVNPATH/assets/ > /dev/null 2>&1 # Create assets directory if it doesn't exists
+		mv $SVNPATH/trunk/assets-wp-repo/* $SVNPATH/assets/ # Move new assets
+		rm -rf $SVNPATH/trunk/assets-wp-repo # Clean up
+		cd $SVNPATH/assets/ # Switch to assets directory
+		svn stat | grep "^?\|^M" > /dev/null 2>&1 # Check if new or updated assets exists
+		if [ $? -eq 0 ]
+			then
+				svn stat | grep "^?" | awk '{print $2}' | xargs svn add --quiet # Add new assets
+				echo -en "Committing new assets..."
+				#svn commit --quiet --username=$SVNUSER -m "Updated assets"
+				echo "Done."
+			else
+				echo "Unchanged."
+		fi
 	else
-		echo "Unchanged."
+		echo "No assets exists."
 fi
-rm -rf $SVNPATH/trunk/assets-wp-repo # Clean up
 
 cd $SVNPATH/trunk/
 
@@ -104,22 +109,15 @@ echo -n "Enter a commit message for this new SVN version..."
 $DEFAULT_EDITOR /tmp/wppdcommitmsg.tmp
 COMMITMSG=`cat /tmp/wppdcommitmsg.tmp`
 rm /tmp/wppdcommitmsg.tmp
-echo -e "\rEnter a commit message for this new SVN version...Done."
-
-echo "Committing new SVN version..."
-#svn commit --quiet --username=$SVNUSER -m "$COMMITMSG"
-echo "Committing new SVN version...Done"
-
-echo -n "Tagging new SVN version..."
-cd $SVNPATH
-svn copy --quiet trunk/ tags/$NEWVERSION1/
 echo "Done."
 
-cd $SVNPATH/tags/$NEWVERSION1
+echo -n "Committing new SVN version..."
+#svn commit --quiet --username=$SVNUSER -m "$COMMITMSG"
+echo "Done."
 
-echo "Committing new SVN tag..."
-#svn commit --quiet --username=$SVNUSER -m "Tagging version $NEWVERSION1"
-echo "Committing new SVN tag...Done"
+echo -n "Tagging and committing new SVN tag..."
+#svn copy $SVNURL/trunk $SVNURL/tags/$NEWVERSION1 --quiet --username=$SVNUSER -m "Tagging version $NEWVERSION1"
+echo "Done."
 
 echo -n "Removing temporary directory $SVNPATH..."
 rm -rf $SVNPATH/
