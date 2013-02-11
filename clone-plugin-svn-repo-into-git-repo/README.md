@@ -1,29 +1,31 @@
 #Clone your WordPress plugin SVN repo into a Git repo
 
-```
-# Create an empty dir
-$ mkdir public-post-preview
+Replace `plugin_slug` with the slug of your plugin.
 
-# Get revision number
-$ svn log -r 1:HEAD --limit 1 http://plugins.svn.wordpress.org/public-post-preview
 
-# Clone it
-$ git svn clone -t tags -b branches -T trunk -r93485 --no-minimize-url --no-metadata http://plugins.svn.wordpress.org/public-post-preview public-post-preview
+### Get revision number
+	$ svn log -r 1:HEAD --limit 1 http://plugins.svn.wordpress.org/plugin_slug
+Copy the revision number (*rXXXXXXX*).
 
-# Get commits and files, can take hours...
-$ cd public-post-preview/
-$ GIT_TRACE=2 git svn fetch 
+### Clone it
+	$ git svn clone -t tags -b branches -T trunk -rev_num --no-minimize-url --no-metadata http://plugins.svn.wordpress.org/plugin_slug plugin_slug
+Replace `rev_num` with the revision number from the previous step. Don't miss `-r` before the number.
 
-# Clean up, build the git log
-$ git svn rebase 
+### Get commits and files
+	$ cd plugin_slug/
+	$ GIT_TRACE=2 git svn fetch
+This step can take hours. `GIT_TRACE=2` returns verbose output.
 
-# Add GitHub remote as origin
-$ git remote add origin git@github.com:ocean90/public-post-preview.git
+### Clean up, build the Git log
+	$ git svn rebase 
 
-# Push it
-$ git push origin master 
+### Add GitHub remote as origin
+	$ git remote add origin git@github.com:user_name/plugin_slug.git
+Replace `user_name` with your GitHub username.
 
-# Tags
-$ git tag -f "0.1" e1e6fe356d45c975902621cbba58255b8751420a
-$ git push --tags
-```
+### Push it
+	$ git push origin master 
+
+### Tags (optional)
+	$ git tag -f "0.1" e1e6fe
+	$ git push --tags
