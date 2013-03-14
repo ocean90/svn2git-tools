@@ -1,5 +1,7 @@
 #Automated WordPress plugin deployment - Git to SVN
 
+![Example Output](https://raw.github.com/ocean90/svn2git-tools/master/automated-wordpress-plugin-deployment/screenshot.png)
+
 ##How to
 
 ##Credits
