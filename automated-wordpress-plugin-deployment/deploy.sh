@@ -104,6 +104,10 @@ echo -n "Adding new files..."
 svn stat | grep "^?" | awk '{print $2}' | xargs svn add --quiet
 echo "Done."
 
+echo -n "Removing old files..."
+svn stat | grep "^\!" | awk '{print $2}' | xargs svn remove --quiet
+echo "Done."
+
 echo -n "Enter a commit message for this new SVN version..."
 $DEFAULT_EDITOR /tmp/wppdcommitmsg.tmp
 COMMITMSG=`cat /tmp/wppdcommitmsg.tmp`
